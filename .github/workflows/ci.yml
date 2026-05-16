@@ -1,0 +1,68 @@
+# .github/workflows/ci.yml
+# Pipeline de Integração Contínua para swe4ds-credit-api
+#
+# Este workflow é acionado em:
+# - Push para branch main
+# - Pull requests para branch main
+#
+# Executa:
+# - Linting com ruff (opcional)
+# - Testes com pytest
+# - Cobertura de código
+
+name: CI
+
+# Quando executar
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Variáveis de ambiente
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  test:
+    name: Testes Unitários
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout do código
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+      
+      # 2. Setup Python
+      - name: Configurar Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      # 3. Instalar UV (gerenciador de pacotes rápido)
+      - name: Instalar UV
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      
+      # 4. Instalar dependências
+      - name: Instalar dependências
+        run: |
+          uv pip install --system -r requirements.txt
+          uv pip install --system pytest pytest-cov
+      
+      # 5. Rodar testes com cobertura
+      - name: Executar testes
+        run: |
+          pytest tests/ -v --cov=src --cov-report=xml --cov-report=term-missing
+      
+      # 6. Upload do relatório de cobertura (opcional)
+      - name: Upload cobertura para Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
