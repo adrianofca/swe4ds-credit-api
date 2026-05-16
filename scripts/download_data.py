@@ -30,7 +30,7 @@ def download_credit_dataset():
     header = "ID,LIMIT_BAL,SEX,EDUCATION,MARRIAGE,AGE,PAY_0,PAY_2,PAY_3,PAY_4,PAY_5,PAY_6,BILL_AMT1,BILL_AMT2,BILL_AMT3,BILL_AMT4,BILL_AMT5,BILL_AMT6,PAY_AMT1,PAY_AMT2,PAY_AMT3,PAY_AMT4,PAY_AMT5,PAY_AMT6,default\n"
     
     rows = []
-    for i in range(1, 1001):  # 1000 registros de exemplo
+    for i in range(1, 2001):  # 1000 registros de exemplo
         row = [
             i,                              # ID
             random.randint(10000, 500000),  # LIMIT_BAL
