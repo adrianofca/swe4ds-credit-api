@@ -229,3 +229,5 @@ __marimo__/
 /models/*.joblib
 /models/*.h5
 /models/*.ptgitgit
+
+echo ".env" >> .gitignore

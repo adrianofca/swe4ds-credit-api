@@ -1,0 +1,20 @@
+# docker-compose.override.yml
+# Configurações adicionais para desenvolvimento
+# Automaticamente carregado junto com docker-compose.yml
+
+services:
+  api:
+    # Em dev, montar código como volume para hot reload
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./scripts:/app/scripts
+    
+    # Mais variáveis de debug
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+    
+    # Manter container rodando mesmo sem CMD
+    stdin_open: true
+    tty: true
