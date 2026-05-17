@@ -1,88 +1,79 @@
 # src/validation.py
 """
-Módulo de validação para dados de crédito.
+Módulo de validação de dados para análise de crédito.
 
-Funções de validação para garantir qualidade dos dados
-antes de processamento e predição.
+Este módulo contém funções para validar os dados de entrada
+da API de análise de crédito.
 """
-from typing import TypeAlias
 
-# Type alias para valores numéricos
-NumericValue: TypeAlias = int | float
-
-# Constantes de validação
-LIMIT_BAL_MIN: int = 1
-LIMIT_BAL_MAX: int = 1_000_000
-
-AGE_MIN: int = 18
-AGE_MAX: int = 100
-
-VALID_EDUCATION: tuple[int, ...] = (1, 2, 3, 4)
-VALID_MARRIAGE: tuple[int, ...] = (1, 2, 3)
+from typing import Any
 
 
-def validate_limit_bal(value: NumericValue) -> bool:
+def validate_limit_bal(limit_bal: float) -> bool:
     """
-    Valida se o limite de crédito é aceitável.
-    
-    Limite deve estar entre 1 e 1.000.000.
-    
+    Valida o limite de crédito.
+
     Args:
-        value: Valor do limite de crédito.
-        
+        limit_bal: Valor do limite de crédito em NT$.
+
     Returns:
-        True se válido (1 <= value <= 1.000.000), False caso contrário.
+        True se o valor é válido (positivo), False caso contrário.
+
+    Examples:
+        >>> validate_limit_bal(50000)
+        True
+        >>> validate_limit_bal(-1000)
+        False
     """
-    return LIMIT_BAL_MIN <= value <= LIMIT_BAL_MAX
+    return limit_bal > 0
 
 
-def validate_age(value: NumericValue) -> bool:
+def validate_age(age: int) -> bool:
     """
-    Valida se a idade é aceitável para análise de crédito.
-    
-    Idade deve estar entre 18 e 100 anos.
-    
+    Valida a idade do cliente.
+
     Args:
-        value: Idade em anos.
-        
+        age: Idade em anos.
+
     Returns:
-        True se válido (18 <= value <= 100), False caso contrário.
+        True se a idade está no range válido (18-120), False caso contrário.
     """
-    return AGE_MIN <= value <= AGE_MAX
+    return 18 <= age <= 120
 
 
-def validate_education(value: int) -> bool:
+def validate_education(education: int) -> bool:
     """
-    Valida código de educação.
-    
-    Códigos válidos:
-    - 1: Graduate school
-    - 2: University
-    - 3: High school
-    - 4: Others
-    
+    Valida o nível educacional.
+
     Args:
-        value: Código de educação.
-        
+        education: Código do nível educacional (1-4).
+
     Returns:
-        True se válido, False caso contrário.
+        True se o código é válido, False caso contrário.
     """
-    return value in VALID_EDUCATION
+    valid_codes = {1, 2, 3, 4}  # 1=graduate, 2=university, 3=high school, 4=others
+    return education in valid_codes
 
 
-def validate_marriage(value: int) -> bool:
+def validate_input(data: dict[str, Any]) -> dict[str, list[str]]:
     """
-    Valida código de estado civil.
-    
-    Códigos válidos:
-    - 1: Married
-    - 2: Single
-    - 3: Others
-    
+    Valida todos os campos de entrada.
+
     Args:
-        value: Código de estado civil.
-        
+        data: Dicionário com os dados do cliente.
+
     Returns:
-        True se válido, False caso contrário.
+        Dicionário com lista de erros por campo.
     """
-    return value in VALID_MARRIAGE
+    errors: dict[str, list[str]] = {}
+
+    if "LIMIT_BAL" in data and not validate_limit_bal(data["LIMIT_BAL"]):
+        errors.setdefault("LIMIT_BAL", []).append("Limite deve ser positivo")
+
+    if "AGE" in data and not validate_age(data["AGE"]):
+        errors.setdefault("AGE", []).append("Idade deve estar entre 18 e 120")
+
+    if "EDUCATION" in data and not validate_education(data["EDUCATION"]):
+        errors.setdefault("EDUCATION", []).append("Educação deve ser 1, 2, 3 ou 4")
+
+    return errors
